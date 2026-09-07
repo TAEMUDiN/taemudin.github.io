@@ -507,36 +507,6 @@
     padding:6px 11px;
   }
 
-  /* ad overlay */
-  .adoverlay{
-    position:fixed; inset:0; z-index:80;
-    background:rgba(18,14,10,.7);
-    display:none; align-items:center; justify-content:center;
-    padding:22px;
-  }
-  .adoverlay.show{ display:flex; }
-  .adcard{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:18px;
-    padding:34px 26px 28px;
-    max-width:320px; width:100%;
-    text-align:center;
-    box-shadow:0 30px 70px -24px rgba(0,0,0,.55);
-  }
-  .adtag{
-    display:inline-block;
-    font-size:.68rem; letter-spacing:.14em;
-    color:var(--ink-soft);
-    border:1px solid var(--border); border-radius:999px;
-    padding:3px 11px; margin-bottom:16px;
-  }
-  .adcard .adtitle{ font-family:"Song Myung",serif; font-size:1.1rem; margin-bottom:6px; }
-  .adcard .adsub{ font-size:.82rem; color:var(--ink-soft); margin-bottom:18px; }
-  .adnum{ font-family:"Song Myung",serif; font-size:2.4rem; color:var(--accent); margin-bottom:14px; font-variant-numeric:tabular-nums; }
-  .adbar{ height:6px; background:var(--surface-2); border-radius:4px; overflow:hidden; margin-bottom:22px; }
-  .adbar i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--accent)); transition:width 1s linear; }
-
   /* save view (image gallery + save-all) */
   .saveview{ display:none; position:relative; z-index:1; }
   .saveview.show{ display:block; }
@@ -710,17 +680,6 @@
       <p class="footnote">이 결과는 MBTI · 혈액형 · 생년월일(시)을 조합해 재미로 만든 콘텐츠예요.<br>실제 명리학(사주) 해석이나 심리 검사 결과와는 다를 수 있어요.</p>
     </div>
   </section>
-</div>
-
-<div class="adoverlay" id="adOverlay">
-  <div class="adcard">
-    <span class="adtag">AD</span>
-    <div class="adtitle">잠시 광고를 보고 진행할게요</div>
-    <div class="adsub">HARU운세카드를 무료로 유지하는 데 도움이 돼요</div>
-    <div class="adnum" id="adNum">3</div>
-    <div class="adbar"><i id="adBarFill"></i></div>
-    <button type="button" class="btn btn-primary" id="adBtn" style="width:100%;" disabled>잠시만요</button>
-  </div>
 </div>
 
 <div class="dateoverlay" id="dateOverlay">
@@ -924,49 +883,6 @@
     });
     $("stepbar").style.display = n===0 ? "none" : "flex";
     window.scrollTo(0,0);
-  }
-
-  /* ---------------- AD GATE (simulated) ---------------- */
-
-  function showAd(){
-    return new Promise(function(resolve){
-      var overlay = $("adOverlay");
-      var num = $("adNum");
-      var bar = $("adBarFill");
-      var btn = $("adBtn");
-      var seconds = 3;
-      num.textContent = seconds;
-      bar.style.transition = "none";
-      bar.style.width = "0%";
-      btn.disabled = true;
-      btn.textContent = "잠시만요 (" + seconds + ")";
-      overlay.classList.add("show");
-
-      requestAnimationFrame(function(){
-        bar.style.transition = "width " + seconds + "s linear";
-        bar.style.width = "100%";
-      });
-
-      var timer = setInterval(function(){
-        seconds -= 1;
-        if(seconds > 0){
-          num.textContent = seconds;
-          btn.textContent = "잠시만요 (" + seconds + ")";
-        } else {
-          num.textContent = "0";
-          btn.textContent = "계속하기";
-          btn.disabled = false;
-          clearInterval(timer);
-        }
-      }, 1000);
-
-      btn.onclick = function(){
-        if(btn.disabled) return;
-        clearInterval(timer);
-        overlay.classList.remove("show");
-        resolve();
-      };
-    });
   }
 
   $("startBtn").addEventListener("click", function(){
@@ -1203,15 +1119,13 @@
     hourGrid.appendChild(b);
   });
   $("back4").addEventListener("click", function(){ showStep(3); });
-  $("next4").addEventListener("click", async function(){
-    await showAd();
+  $("next4").addEventListener("click", function(){
     renderResult();
     showStep(5);
   });
-  $("skipHour").addEventListener("click", async function(){
+  $("skipHour").addEventListener("click", function(){
     state.hour = null;
     document.querySelectorAll("#hourGrid .chip").forEach(function(c){ c.classList.remove("selected"); });
-    await showAd();
     renderResult();
     showStep(5);
   });
@@ -1670,7 +1584,6 @@
   function showSaveView(){
     document.querySelector(".wrap").style.display = "none";
     $("dateOverlay").classList.remove("show");
-    $("adOverlay").classList.remove("show");
     $("saveView").classList.add("show");
     populateSaveView();
   }
